@@ -5,10 +5,10 @@ FROM ${BASE_IMAGE}
 USER root
 
 # Install Docker CLI and other extras using our custom script
-COPY install-sandbox-extras.sh /tmp/install-sandbox-extras.sh
+COPY install.sh /tmp/install.sh
 RUN --mount=type=cache,id=openclaw-sandbox-bookworm-apt-cache,target=/var/cache/apt,sharing=locked \
     --mount=type=cache,id=openclaw-sandbox-bookworm-apt-lists,target=/var/lib/apt,sharing=locked \
-    bash /tmp/install-sandbox-extras.sh && rm /tmp/install-sandbox-extras.sh
+    bash /tmp/install.sh && rm /tmp/install.sh
 
 USER sandbox
 WORKDIR /home/sandbox

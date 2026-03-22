@@ -1,0 +1,19 @@
+[Unit]
+Description=Predicate Authority Daemon
+After=network.target
+
+[Service]
+User=predicate
+Group=predicate
+Environment=HOME=/home/predicate
+UMask=0077
+Type=simple
+ExecStart=/usr/local/bin/predicate-authorityd run --web-ui
+# ExecStop is no longer needed for Type=simple
+Restart=always
+RestartSec=5
+# Note: Dashboard mode is harder to view when running as a daemon, 
+# but it still logs decisions to the system journal.
+
+[Install]
+WantedBy=multi-user.target

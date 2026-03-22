@@ -1,0 +1,16 @@
+[Unit]
+Description=Mitmproxy Egress Monitor
+After=network.target
+
+[Service]
+User=mitm-proxy
+Group=mitm-proxy
+WorkingDirectory=/home/mitm-proxy
+# mitmproxy needs a home dir to store certs
+Environment=HOME=/home/mitm-proxy
+ExecStart=/usr/local/bin/mitmweb --web-host 0.0.0.0 --web-port 8081 --mode transparent --set block_global=false --set web_password=admin -s /etc/mitmproxy/mitm_filter.py
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

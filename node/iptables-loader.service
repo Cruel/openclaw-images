@@ -1,0 +1,11 @@
+[Unit]
+Description=Load custom iptables rules on startup
+After=network.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/bin/iptables-rules.sh
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
