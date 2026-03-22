@@ -15,7 +15,9 @@ apt-get install -y --no-install-recommends \
     locales \
     sudo \
     udev \
-    curl
+    curl \
+    jq \
+    procps
 
 # Prevents journald from reading kernel messages from /dev/kmsg
 echo "ReadKMsg=no" >> /etc/systemd/journald.conf
@@ -60,7 +62,16 @@ curl -fsSL https://raw.githubusercontent.com/docker/docker-ce/master/components/
 
 # Install Sysbox
 curl -fL "https://github.com/nestybox/sysbox/releases/download/v${SYSBOX_VERSION:-0.6.7}/sysbox-ce_${SYSBOX_VERSION:-0.6.7}.linux_${SYSBOX_ARCH}.deb" -o /tmp/sysbox.deb
+
+# Use dpkg-divert to forcefully mock sysctl in /sbin so dpkg respects it
+dpkg-divert --add --rename --divert /sbin/sysctl.real /sbin/sysctl
+ln -s /bin/true /sbin/sysctl
+
 apt-get install -y /tmp/sysbox.deb
+
+# Restore sysctl
+rm /sbin/sysctl
+dpkg-divert --remove --rename /sbin/sysctl
 
 # 4. Install Security Guardians
 MITMPROXY_VERSION="12.2.1"
