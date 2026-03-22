@@ -51,12 +51,14 @@ jobs:
 
       - name: Build and Push all images
         uses: docker/bake-action@v7
+        env:
+          IMAGE_PREFIX: ${{ env.IMAGE_PREFIX }}
+          OPENCLAW_VARIANT: ${{ env.OPENCLAW_SANDBOX_VARIANT }}
+          OPENCLAW_NODE_IMAGE: ${{ env.OPENCLAW_NODE_IMAGE }}
         with:
           push: true
+          source: .
           # Inherit caching from GitHub Actions
           set: |
             *.cache-from=type=gha
             *.cache-to=type=gha,mode=max
-            IMAGE_PREFIX=${{ env.IMAGE_PREFIX }}
-            OPENCLAW_VARIANT=${{ env.OPENCLAW_SANDBOX_VARIANT }}
-            OPENCLAW_NODE_IMAGE=${{ env.OPENCLAW_NODE_IMAGE }}

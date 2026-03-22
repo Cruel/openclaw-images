@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1.7
-ARG BASE_IMAGE=openclaw-sandbox-base:bookworm-slim
+ARG BASE_IMAGE=openclaw-sandbox-common:bookworm-slim
 FROM ${BASE_IMAGE}
 
 USER root

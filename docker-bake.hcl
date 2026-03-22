@@ -29,15 +29,12 @@ target "sandbox-base" {
   platforms  = ["linux/amd64", "linux/arm64"]
 }
 
-target "sandbox-custom" {
-  context    = "."
-  dockerfile = "Dockerfile.sandbox"
+target "sandbox-common" {
+  context    = "openclaw"
+  dockerfile = "Dockerfile.sandbox-common"
   platforms  = ["linux/amd64", "linux/arm64"]
   contexts = {
-    "openclaw-sandbox:base" = "target:sandbox-base"
-  }
-  args = {
-    BASE_IMAGE = "openclaw-sandbox:base"
+    "openclaw-sandbox:bookworm-slim" = "target:sandbox-base"
   }
 }
 
@@ -57,14 +54,11 @@ target "gateway" {
 }
 
 target "sandbox" {
-  context    = "openclaw"
-  dockerfile = "Dockerfile.sandbox-common"
+  context    = "sandbox"
+  dockerfile = "Dockerfile"
   platforms  = ["linux/amd64", "linux/arm64"]
   contexts = {
-    "openclaw-sandbox:latest" = "target:sandbox-custom"
-  }
-  args = {
-    BASE_IMAGE = "openclaw-sandbox:latest"
+    "openclaw-sandbox-common:bookworm-slim" = "target:sandbox-common"
   }
   tags = ["${IMAGE_PREFIX}/openclaw-sandbox:latest"]
 }
