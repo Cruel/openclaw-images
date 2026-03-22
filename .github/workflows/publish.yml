@@ -6,7 +6,6 @@ on:
   workflow_dispatch:
 
 env:
-  OPENCLAW_SANDBOX: "1"
   OPENCLAW_SANDBOX_VARIANT: "slim"
 
 jobs:
@@ -31,6 +30,12 @@ jobs:
       - name: Set lower case repo name
         run: echo "IMAGE_PREFIX=ghcr.io/${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
       - name: Log in to GHCR
         uses: docker/login-action@v3
         with:
@@ -38,59 +43,64 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build Images
-        run: |
-          # Build main image from the openclaw/ directory
-          echo "==> Building Main image (slim)"
-          docker build \
-            --build-arg "OPENCLAW_VARIANT=${{ env.OPENCLAW_SANDBOX_VARIANT }}" \
-            --build-arg "OPENCLAW_INSTALL_DOCKER_CLI=1" \
-            -t "openclaw:local" \
-            -f "openclaw/Dockerfile" \
-            openclaw/
+      - name: Build and Push Main Image
+        uses: docker/build-push-action@v6
+        with:
+          context: openclaw
+          file: openclaw/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: |
+            OPENCLAW_VARIANT=${{ env.OPENCLAW_SANDBOX_VARIANT }}
+            OPENCLAW_INSTALL_DOCKER_CLI=1
+          tags: ${{ env.IMAGE_PREFIX }}/openclaw:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-          # Build minimal sandbox image from our ROOT Dockerfile
-          if [ "${{ env.OPENCLAW_SANDBOX }}" = "1" ]; then
-            # 1. Build the "vanilla" base first from the openclaw/ folder
-            echo "==> Building Vanilla Sandbox base"
-            docker build \
-              -t "openclaw-sandbox-base:bookworm-slim" \
-              -f "openclaw/Dockerfile.sandbox" \
-              openclaw/
+      - name: Build and Push Sandbox Base
+        uses: docker/build-push-action@v6
+        with:
+          context: openclaw
+          file: openclaw/Dockerfile.sandbox
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ env.IMAGE_PREFIX }}/openclaw-sandbox:base
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-            # 2. Build our customized sandbox using the vanilla base
-            echo "==> Building Customized Sandbox image"
-            docker build \
-              -t "openclaw-sandbox:bookworm-slim" \
-              -f "Dockerfile.sandbox" \
-              .
+      - name: Build and Push Customized Sandbox
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: Dockerfile.sandbox
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: |
+            BASE_IMAGE=${{ env.IMAGE_PREFIX }}/openclaw-sandbox:base
+          tags: ${{ env.IMAGE_PREFIX }}/openclaw-sandbox:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-            # 3. Build sandbox common image (inherits from openclaw-sandbox:bookworm-slim)
-            echo "==> Building Sandbox Common image"
-            docker build \
-              -t "openclaw-sandbox-common:bookworm-slim" \
-              -f "openclaw/Dockerfile.sandbox-common" \
-              openclaw/
+      - name: Build and Push Sandbox Common
+        uses: docker/build-push-action@v6
+        with:
+          context: openclaw
+          file: openclaw/Dockerfile.sandbox-common
+          platforms: linux/amd64,linux/arm64
+          push: true
+          build-args: |
+            BASE_IMAGE=${{ env.IMAGE_PREFIX }}/openclaw-sandbox:latest
+          tags: ${{ env.IMAGE_PREFIX }}/openclaw-sandbox-common:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
 
-            # Build browser sandbox image manually from the openclaw/ directory
-            echo "==> Building Browser Sandbox image"
-            docker build \
-              -t "openclaw-sandbox-browser:bookworm-slim" \
-              -f "openclaw/Dockerfile.sandbox-browser" \
-              openclaw/
-          fi
-
-      - name: Push to GHCR
-        run: |
-          TAG_PUSH() {
-            docker tag "$1" "$IMAGE_PREFIX/$2:latest"
-            docker push "$IMAGE_PREFIX/$2:latest"
-          }
-
-          TAG_PUSH "openclaw:local" "openclaw"
-
-          if [ "${{ env.OPENCLAW_SANDBOX }}" = "1" ]; then
-            for img in openclaw-sandbox openclaw-sandbox-common openclaw-sandbox-browser; do
-              TAG_PUSH "$img:bookworm-slim" "$img"
-            done
-          fi
+      - name: Build and Push Browser Sandbox
+        uses: docker/build-push-action@v6
+        with:
+          context: openclaw
+          file: openclaw/Dockerfile.sandbox-browser
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: ${{ env.IMAGE_PREFIX }}/openclaw-sandbox-browser:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

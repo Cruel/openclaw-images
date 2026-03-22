@@ -6,7 +6,7 @@ export DEBIAN_FRONTEND=noninteractive
 
 # Install docker dependencies
 apt-get update
-apt-get install -y ca-certificates curl gnupg
+apt-get install -y gnupg gh yq dnsutils iputils-ping
 
 # Add Docker's official GPG key
 install -m 0755 -d /etc/apt/keyrings
@@ -23,8 +23,3 @@ Signed-By: /etc/apt/keyrings/docker.asc" > /etc/apt/sources.list.d/docker.source
 
 apt-get update
 apt-get install -y docker-ce-cli docker-buildx-plugin docker-compose-plugin
-
-# Add sandbox user to docker group if it exists
-if id "sandbox" >/dev/null 2>&1; then
-  usermod -aG docker sandbox
-fi
