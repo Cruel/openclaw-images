@@ -49,8 +49,10 @@ else
   fi
 fi
 
-# 3. Handle Configuration Templates
-echo "Handling configuration templates..."
+# 3. Handle Configuration Templates and Directories
+echo "Ensuring configuration directories exist..."
+mkdir -p "$COMPOSE_DIR/gateway_config"
+mkdir -p "$COMPOSE_DIR/node_config"
 mkdir -p "$COMPOSE_DIR"
 for template in "$COMPOSE_DIR"/*.default.*; do
   [ -e "$template" ] || continue

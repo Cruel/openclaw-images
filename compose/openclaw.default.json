@@ -9,7 +9,7 @@
         "workspaceAccess": "rw",
         "docker": {
           "image": "ghcr.io/cruel/openclaw-images/openclaw-sandbox:latest",
-          "binds": []
+          "binds": ["/var/run/docker.sock:/var/run/docker.sock"]
         },
         "browser": {
           "enabled": true,

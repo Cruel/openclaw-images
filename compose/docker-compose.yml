@@ -7,6 +7,12 @@ services:
     environment:
       - PREDICATE_AUTHORITY_URL=http://localhost:8787
       - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+    networks:
+      default:
+        aliases:
+          - openclaw-gateway
+    group_add:
+      - "${DOCKER_GID:-999}"
     volumes:
       - ./predicate-authorityd.toml:/etc/predicate/authorityd.toml:ro
       - ./policy.yaml:/etc/predicate/policy.yaml:ro
@@ -15,8 +21,7 @@ services:
       - ./node-docker-compose.yml:/home/node/docker-compose.yml:ro
       - ./node_config:/home/node/node_config
       - docker_lib:/var/lib/docker
-    group_add:
-      - "${DOCKER_GID:-999}"
+      - mitmproxy_certs:/home/mitm-proxy/.mitmproxy
 
   openclaw-gateway:
     image: ghcr.io/cruel/openclaw-images/openclaw-gateway:latest
@@ -34,9 +39,16 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    network_mode: "service:openclaw-node"
+    environment:
+      - HTTP_PROXY=http://127.0.0.1:8080
+      - HTTPS_PROXY=http://127.0.0.1:8080
+      - NO_PROXY=localhost,127.0.0.1
+      - NODE_EXTRA_CA_CERTS=/home/node/.mitmproxy/mitmproxy-ca-cert.pem
     volumes:
       - ./gateway_config:/home/node/.openclaw
       - ./openclaw.json:/home/node/.openclaw/openclaw.json
+      - mitmproxy_certs:/home/node/.mitmproxy:ro
 
   # Secure Remote Access via Cloudflare Tunnel
   tunnel:
@@ -48,3 +60,4 @@ services:
 
 volumes:
   docker_lib:
+  mitmproxy_certs:
