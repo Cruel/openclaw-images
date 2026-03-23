@@ -3,3 +3,4 @@ mitm_filter.py
 policy.yaml
 predicate-authorityd.toml
 iptables-rules.sh
+openclaw.json

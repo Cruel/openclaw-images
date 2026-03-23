@@ -37,7 +37,7 @@ services:
       start_period: 10s
     volumes:
       - ./gateway_config:/home/node/.openclaw
-      - ./config.json:/root/.openclaw/config.json:ro
+      - ./openclaw.json:/home/node/.openclaw/openclaw.json:ro
 
   # Secure Remote Access via Cloudflare Tunnel
   tunnel:
