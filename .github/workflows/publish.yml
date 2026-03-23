@@ -24,7 +24,7 @@ jobs:
         with:
           repository: openclaw/openclaw
           path: openclaw
-          ref: 61d171ab0b2fe4abc9afe89c518586274b4b76c2
+          ref: ccfeecb6887cd97937e33a71877ad512741e82b2
           fetch-depth: 1
 
       - name: Set lower case repo name
