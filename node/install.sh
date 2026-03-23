@@ -122,7 +122,7 @@ usermod -aG sudo,docker admin
 echo "admin ALL=(ALL) NOPASSWD:ALL" >> /etc/sudoers
 
 # Enable services
-systemctl enable iptables-loader predicate-authorityd mitm-proxy
+systemctl enable iptables-loader predicate-authorityd mitm-proxy openclaw-node
 
 # Setup mitm-proxy home
 mkdir -p /home/mitm-proxy/.mitmproxy && chown -R mitm-proxy:mitm-proxy /home/mitm-proxy

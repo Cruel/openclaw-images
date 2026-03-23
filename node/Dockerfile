@@ -12,6 +12,7 @@ COPY install.sh /usr/local/bin/install.sh
 COPY iptables-loader.service /etc/systemd/system/iptables-loader.service
 COPY predicate-authorityd.service /etc/systemd/system/predicate-authorityd.service
 COPY mitm-proxy.service /etc/systemd/system/mitm-proxy.service
+COPY openclaw-node.service /etc/systemd/system/openclaw-node.service
 
 # Install system and register services
 RUN chmod +x /usr/local/bin/install.sh && \
