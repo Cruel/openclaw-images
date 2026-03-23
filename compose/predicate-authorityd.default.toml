@@ -1,0 +1,24 @@
+# Predicate Authority Best-Practice Config
+
+[server]
+host = "0.0.0.0"
+port = 8787
+mode = "local_only"
+shutdown_timeout_s = 30
+
+[policy]
+file = "/etc/predicate/policy.yaml"
+# Enable instant updates without container restarts!
+hot_reload = true
+
+[logging]
+level = "debug"   # High visibility for development
+format = "compact"
+
+[ssrf]
+# Protects your host system and cloud metadata from agent probing
+# allowed_endpoints = ["127.0.0.1:11434"] # Example: Allow local Ollama access
+disabled = false
+
+[identity]
+default_ttl_s = 3600 # 1 hour session for dev comfort

@@ -1,8 +1,7 @@
 #!/bin/bash
 # True Zero-Trust Fail-Closed Mode.
-# We lock the doors BEFORE we start looking for the guardian.
 
-echo "🔐 Trusting Local Egress Guardian certificate..."
+echo "Trusting Local Egress Guardian certificate..."
 # Wait up to 10s for the local mitmproxy to generate its certificate
 for i in {1..10}; do
     CERT_FILE="/home/mitm-proxy/.mitmproxy/mitmproxy-ca-cert.pem"
@@ -15,7 +14,7 @@ for i in {1..10}; do
     sleep 1
 done
 
-echo "🔒 INITIAL LOCKDOWN: Blocking web traffic until monitor is ready..."
+echo "Blocking web traffic until monitor is ready..."
 
 # 1. Allow indispensable traffic (local loopback and DNS)
 iptables -A OUTPUT -o lo -j ACCEPT
@@ -36,7 +35,7 @@ iptables -A OUTPUT -p tcp --dport 443 -j REJECT
 
 # 5. HARDEN CONFIG PERMISSIONS (Defense in Depth)
 # We restrict the parent directories so the 'openclaw' user cannot even enter them.
-echo "🛡️  Hardening configuration permissions..."
+echo "Hardening configuration permissions..."
 chown -R predicate:predicate /etc/predicate && chmod 700 /etc/predicate
 chown -R mitm-proxy:mitm-proxy /etc/mitmproxy && chmod 750 /etc/mitmproxy
 

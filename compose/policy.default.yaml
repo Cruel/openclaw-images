@@ -1,0 +1,27 @@
+# Predicate OpenClaw Policy (YAML)
+# Secure-Closed Strategy: Any tool call NOT explicitly allowed here will be blocked.
+
+rules:
+  - name: "allow-browser-https"
+    effect: "allow"
+    principals: ["agent:*"]
+    actions: ["browser.*"]
+    resources: ["https://*"]
+
+  - name: "allow-read-workspace"
+    effect: "allow"
+    principals: ["agent:*"]
+    actions: ["fs.read"]
+    resources: ["**/home/openclaw/**"]
+
+  - name: "deny-sensitive-env"
+    effect: "deny"
+    principals: ["agent:*"]
+    actions: ["fs.*"]
+    resources: ["**/.env", "**/config/secrets/**"]
+
+  - name: "allow-safe-shell"
+    effect: "allow"
+    principals: ["agent:*"]
+    actions: ["shell.exec"]
+    resources: ["ls *", "git *", "pnpm *", "uv *"]
