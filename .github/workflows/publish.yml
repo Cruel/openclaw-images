@@ -60,5 +60,15 @@ jobs:
           source: .
           # Inherit caching from GitHub Actions
           set: |
-            *.cache-from=type=gha
-            *.cache-to=type=gha,mode=max
+            gateway.cache-from=type=gha,scope=gateway
+            gateway.cache-to=type=gha,mode=max,scope=gateway
+            sandbox.cache-from=type=gha,scope=sandbox
+            sandbox.cache-to=type=gha,mode=max,scope=sandbox
+            sandbox-browser.cache-from=type=gha,scope=sandbox-browser
+            sandbox-browser.cache-to=type=gha,mode=max,scope=sandbox-browser
+            node.cache-from=type=gha,scope=node
+            node.cache-to=type=gha,mode=max,scope=node
+            sandbox-base.cache-from=type=gha,scope=sandbox-base
+            sandbox-base.cache-to=type=gha,mode=max,scope=sandbox-base
+            sandbox-common.cache-from=type=gha,scope=sandbox-common
+            sandbox-common.cache-to=type=gha,mode=max,scope=sandbox-common
