@@ -1,0 +1,25 @@
+services:
+  openclaw-node-host:
+    image: ghcr.io/cruel/openclaw-images/openclaw-gateway:latest
+    container_name: openclaw-node-host
+    restart: always
+    environment:
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+    command:
+      [
+        "node",
+        "openclaw.mjs",
+        "node",
+        "run",
+        "--host",
+        "openclaw-gateway",
+        "--port",
+        "18789",
+        "--token",
+        "${OPENCLAW_GATEWAY_TOKEN}",
+      ]
+    volumes:
+      - ./worker_workspace:/home/node/.openclaw/workspace
+    # Point openclaw-gateway to the host IP so it can reach the official gateway
+    extra_hosts:
+      - "openclaw-gateway:host-gateway"
