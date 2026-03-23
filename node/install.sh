@@ -101,20 +101,14 @@ systemctl mask getty.service getty.target
 # Force overlay2 storage driver
 mkdir -p /etc/docker && echo '{"storage-driver":"overlay2"}' > /etc/docker/daemon.json
 
-# Create 'openclaw' user with fixed UID 1001 (to match volume ownership)
-# Force remove any user/group that might have snagged 1001
-if id -u 1001 &>/dev/null; then
-    userdel -f $(id -nu 1001) || true
-fi
-groupadd -f -g 1001 openclaw
-useradd -u 1001 -g 1001 -m -s /bin/bash openclaw
-usermod -aG docker openclaw
-echo "openclaw:openclaw" | chpasswd
-mkdir -p /home/openclaw/.openclaw && chown -R openclaw:openclaw /home/openclaw
+# Configure existing 'node' user (UID 1000)
+usermod -aG docker node
+echo "node:node" | chpasswd
+mkdir -p /home/node/.openclaw && chown -R node:node /home/node
 
-# Enable lingering for 'openclaw' user
+# Enable lingering for 'node' user
 mkdir -p /var/lib/systemd/linger
-touch /var/lib/systemd/linger/openclaw
+touch /var/lib/systemd/linger/node
 
 useradd --create-home --shell /bin/bash admin
 echo "admin:admin" | chpasswd

@@ -4,3 +4,6 @@ policy.yaml
 predicate-authorityd.toml
 iptables-rules.sh
 openclaw.json
+
+node_config/
+gateway_config/

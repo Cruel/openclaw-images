@@ -19,7 +19,6 @@ services:
         "${OPENCLAW_GATEWAY_TOKEN}",
       ]
     volumes:
-      - ./worker_workspace:/home/node/.openclaw/workspace
-    # Point openclaw-gateway to the host IP so it can reach the official gateway
-    extra_hosts:
-      - "openclaw-gateway:host-gateway"
+      - ./node:/home/node/.openclaw
+    # TODO: Pass the openclaw-gateway host instead of this
+    network_mode: "host"

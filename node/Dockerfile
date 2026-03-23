@@ -26,7 +26,7 @@ STOPSIGNAL SIGRTMIN+3
 VOLUME /var/lib/docker
 
 # Set working directory to openclaw home
-WORKDIR /home/openclaw
+WORKDIR /home/node
 
 # Set systemd as entrypoint.
 # Note: For systemd containers, the entrypoint must remain as /sbin/init (root).

@@ -11,11 +11,9 @@ services:
       - ./policy.yaml:/etc/predicate/policy.yaml:ro
       - ./mitm_filter.py:/etc/mitmproxy/mitm_filter.py:ro
       - ./iptables-rules.sh:/usr/local/bin/iptables-rules.sh:ro
-      - ./node-docker-compose.yml:/home/openclaw/docker-compose.yml:ro
-      - openclaw_home:/home/openclaw
+      - ./node-docker-compose.yml:/home/node/docker-compose.yml:ro
+      - ./node_config:/home/node/node
       - docker_lib:/var/lib/docker
-    ports:
-      - "8081:8081" # Moved to Cloudflare Tunnel for better security
     group_add:
       - "${DOCKER_GID:-999}"
 
@@ -37,7 +35,7 @@ services:
       start_period: 10s
     volumes:
       - ./gateway_config:/home/node/.openclaw
-      - ./openclaw.json:/home/node/.openclaw/openclaw.json:ro
+      - ./openclaw.json:/home/node/.openclaw/openclaw.json
 
   # Secure Remote Access via Cloudflare Tunnel
   tunnel:
@@ -48,5 +46,4 @@ services:
     restart: always
 
 volumes:
-  openclaw_home:
   docker_lib:
