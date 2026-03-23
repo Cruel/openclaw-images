@@ -19,6 +19,8 @@ services:
         "${OPENCLAW_GATEWAY_TOKEN}",
       ]
     volumes:
-      - ./node:/home/node/.openclaw
-    # TODO: Pass the openclaw-gateway host instead of this
+      - ./node_config:/home/node/.openclaw
+      - /var/run/docker.sock:/var/run/docker.sock
+    # network_mode: "host" is required so it connects to the outer docker network namespace
+    # and properly resolves the openclaw-gateway hostname through the outer Docker DNS.
     network_mode: "host"

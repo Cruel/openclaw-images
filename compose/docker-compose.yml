@@ -6,13 +6,14 @@ services:
     privileged: ${OPENCLAW_NODE_PRIVILEGED:-false}
     environment:
       - PREDICATE_AUTHORITY_URL=http://localhost:8787
+      - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
     volumes:
       - ./predicate-authorityd.toml:/etc/predicate/authorityd.toml:ro
       - ./policy.yaml:/etc/predicate/policy.yaml:ro
       - ./mitm_filter.py:/etc/mitmproxy/mitm_filter.py:ro
       - ./iptables-rules.sh:/usr/local/bin/iptables-rules.sh:ro
       - ./node-docker-compose.yml:/home/node/docker-compose.yml:ro
-      - ./node_config:/home/node/node
+      - ./node_config:/home/node/node_config
       - docker_lib:/var/lib/docker
     group_add:
       - "${DOCKER_GID:-999}"
