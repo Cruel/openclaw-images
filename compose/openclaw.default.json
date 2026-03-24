@@ -1,9 +1,7 @@
 {
   "agents": {
     "defaults": {
-      "workspace": "/home/openclaw/.openclaw/workspace",
       "sandbox": {
-        "backend": "docker",
         "mode": "all",
         "scope": "agent",
         "workspaceAccess": "rw",

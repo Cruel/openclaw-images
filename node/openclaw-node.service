@@ -8,7 +8,6 @@ Type=simple
 User=node
 WorkingDirectory=/home/node
 PassEnvironment=OPENCLAW_GATEWAY_TOKEN
-ExecStartPre=/usr/local/bin/docker-compose pull
 ExecStart=/usr/local/bin/docker-compose up
 ExecStop=/usr/local/bin/docker-compose down
 Restart=always

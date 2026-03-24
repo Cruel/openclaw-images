@@ -5,7 +5,7 @@ set -euo pipefail
 GEN_COMMENT="# GENERATED: DO NOT EDIT"
 COMPOSE_DIR="./compose"
 
-# 1. Detect Host Docker GID
+# Detect Host Docker GID
 DOCKER_SOCKET="/var/run/docker.sock"
 if [ -S "$DOCKER_SOCKET" ]; then
   # Try Linux (stat -c) and macOS (stat -f)
@@ -21,7 +21,7 @@ else
   echo "WARNING: Docker socket not found at $DOCKER_SOCKET. Using default: 999"
 fi
 
-# 2. Environment Detection
+# Environment Detection
 IS_WSL2=false
 if grep -qiE "microsoft|WSL2" /proc/version 2>/dev/null; then
   IS_WSL2=true
@@ -49,15 +49,22 @@ else
   fi
 fi
 
-# 3. Handle Configuration Templates and Directories
+# Handle Configuration Templates and Directories
 echo "Ensuring configuration directories exist..."
 mkdir -p "$COMPOSE_DIR/gateway_config"
 mkdir -p "$COMPOSE_DIR/node_config"
 mkdir -p "$COMPOSE_DIR"
 for template in "$COMPOSE_DIR"/*.default.*; do
   [ -e "$template" ] || continue
-  # Get the target filename by removing '.default'
-  target="${template//.default/}"
+  
+  base_template=$(basename "$template")
+  target_name="${base_template//.default/}"
+  
+  if [ "$target_name" == "openclaw.json" ]; then
+    target="$COMPOSE_DIR/gateway_config/openclaw.json"
+  else
+    target="$COMPOSE_DIR/$target_name"
+  fi
   
   if [ ! -f "$target" ]; then
     cp "$template" "$target"
@@ -67,7 +74,7 @@ for template in "$COMPOSE_DIR"/*.default.*; do
   fi
 done
 
-# 4. Update .env file
+# Update .env file
 ENV_FILE="$COMPOSE_DIR/.env"
 if [ ! -f "$ENV_FILE" ]; then
   touch "$ENV_FILE"
@@ -75,20 +82,19 @@ fi
 
 # Update or add configurations
 tmp_env=$(mktemp)
-# Filter out existing entries to avoid duplicates
-grep -Ev "^(DOCKER_GID|OPENCLAW_NODE_RUNTIME|OPENCLAW_NODE_PRIVILEGED|OPENCLAW_GATEWAY_TOKEN)=" "$ENV_FILE" > "$tmp_env" || true
+
+# Prepend Managed Variables
 echo "DOCKER_GID=$DOCKER_GID $GEN_COMMENT" >> "$tmp_env"
 echo "OPENCLAW_NODE_RUNTIME=$RUNTIME $GEN_COMMENT" >> "$tmp_env"
 echo "OPENCLAW_NODE_PRIVILEGED=$PRIVILEGED $GEN_COMMENT" >> "$tmp_env"
 
-# 5. Handle Gateway Token (Preserve if exists, generate if missing)
+# Handle Gateway Token
 if grep -q "^OPENCLAW_GATEWAY_TOKEN=" "$ENV_FILE"; then
-  # Extract existing token to preserve it
+  # Preserve existing token
   grep "^OPENCLAW_GATEWAY_TOKEN=" "$ENV_FILE" >> "$tmp_env"
 else
-  # Attempt to generate a secure token
+  # Generate or set placeholder
   DEFAULT_TOKEN=$(openssl rand -hex 16 2>/dev/null || echo "")
-  
   if [ -n "$DEFAULT_TOKEN" ]; then
     echo "OPENCLAW_GATEWAY_TOKEN=$DEFAULT_TOKEN $GEN_COMMENT" >> "$tmp_env"
     echo "Generated a new OPENCLAW_GATEWAY_TOKEN"
@@ -101,6 +107,9 @@ else
     echo "--------------------------------------------------------------------------------"
   fi
 fi
+
+# Append remaining existing configuration
+grep -Ev "^(DOCKER_GID|OPENCLAW_NODE_RUNTIME|OPENCLAW_NODE_PRIVILEGED|OPENCLAW_GATEWAY_TOKEN)=" "$ENV_FILE" >> "$tmp_env" || true
 
 mv "$tmp_env" "$ENV_FILE"
 echo "Updated $ENV_FILE with GID, RUNTIME, and PRIVILEGED."
