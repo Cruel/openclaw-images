@@ -22,17 +22,10 @@ jobs:
       - name: Checkout OpenClaw
         uses: actions/checkout@v4
         with:
-          repository: openclaw/openclaw
+          repository: Cruel/openclaw
           path: openclaw
-          ref: ccfeecb6887cd97937e33a71877ad512741e82b2
+          ref: secure
           fetch-depth: 1
-
-      - name: Patch OpenClaw Sandbox Browser SSRF Policy
-        run: |
-          # Patch sandbox browser ssrfPolicy bug (requires relaxed policy for containerized loopback)
-          TARGET="openclaw/src/agents/sandbox/browser.ts"
-          sed -i '/extraArgs: \[\],/a \    ssrfPolicy: { dangerouslyAllowPrivateNetwork: true },' "$TARGET"
-          grep "ssrfPolicy:" "$TARGET" || (echo "Failed to patch $TARGET" && exit 1)
 
       - name: Set lower case repo name
         run: echo "IMAGE_PREFIX=ghcr.io/${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
