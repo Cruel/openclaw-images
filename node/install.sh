@@ -61,7 +61,7 @@ mkdir -p /etc/bash_completion.d
 curl -fsSL https://raw.githubusercontent.com/docker/docker-ce/master/components/cli/contrib/completion/bash/docker -o /etc/bash_completion.d/docker.sh
 
 # Install Sysbox
-curl -fL "https://github.com/nestybox/sysbox/releases/download/v${SYSBOX_VERSION:-0.6.7}/sysbox-ce_${SYSBOX_VERSION:-0.6.7}.linux_${SYSBOX_ARCH}.deb" -o /tmp/sysbox.deb
+curl -fL "https://github.com/nestybox/sysbox/releases/download/v${CONTAINER_SYSBOX_VERSION:-0.6.7}/sysbox-ce_${CONTAINER_SYSBOX_VERSION:-0.6.7}.linux_${SYSBOX_ARCH}.deb" -o /tmp/sysbox.deb
 
 # Use dpkg-divert to forcefully mock sysctl in /sbin so dpkg respects it
 dpkg-divert --add --rename --divert /sbin/sysctl.real /sbin/sysctl
