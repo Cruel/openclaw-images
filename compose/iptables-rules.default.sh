@@ -17,6 +17,11 @@ if command -v ip6tables >/dev/null 2>&1; then
     ip6tables -t filter -I FORWARD 1 -j OPENCLAW_V6_DROP
     
     ip6tables -A OPENCLAW_V6_DROP -o lo -j ACCEPT
+
+    # Allow the proxy and root to bypass the IPv6 block
+    ip6tables -A OPENCLAW_V6_DROP -m owner --uid-owner 997 -j ACCEPT
+    ip6tables -A OPENCLAW_V6_DROP -m owner --uid-owner 0 -j ACCEPT
+
     ip6tables -A OPENCLAW_V6_DROP -j REJECT
 fi
 
@@ -45,6 +50,7 @@ iptables -A OPENCLAW_FWD -m conntrack --ctstate ESTABLISHED,RELATED -j ACCEPT
 
 # 2. Allow indispensable traffic (local loopback and DNS)
 iptables -A OPENCLAW_OUT -o lo -j ACCEPT
+iptables -A OPENCLAW_OUT -p tcp --dport 8080 -j ACCEPT
 iptables -A OPENCLAW_OUT -p udp --dport 53 -j ACCEPT
 iptables -A OPENCLAW_OUT -p tcp --dport 53 -j ACCEPT
 
@@ -85,6 +91,7 @@ iptables -A OPENCLAW_OUT -d 192.168.0.0/16 -j ACCEPT
 iptables -A OPENCLAW_FWD -d 10.0.0.0/8 -j ACCEPT
 iptables -A OPENCLAW_FWD -d 172.16.0.0/12 -j ACCEPT
 iptables -A OPENCLAW_FWD -d 192.168.0.0/16 -j ACCEPT
+iptables -A OPENCLAW_FWD -p tcp --dport 8080 -j ACCEPT
 
 # 4. STRICT ZERO-TRUST FAIL-CLOSED: Reject EVERYTHING ELSE.
 # Drops all external non-HTTP/HTTPS traffic, alternate ports, and raw connections
