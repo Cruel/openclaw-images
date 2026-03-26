@@ -1,6 +1,7 @@
 {
   "agents": {
     "defaults": {
+      "workspace": "/home/node/workspace",
       "sandbox": {
         "mode": "all",
         "scope": "agent",

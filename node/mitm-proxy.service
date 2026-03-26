@@ -1,14 +1,17 @@
 [Unit]
 Description=Mitmproxy Egress Monitor
 After=network.target
+Before=docker.service
 
 [Service]
+Type=exec
 User=mitm-proxy
 Group=mitm-proxy
 WorkingDirectory=/home/mitm-proxy
 # mitmproxy needs a home dir to store certs
 Environment=HOME=/home/mitm-proxy
 ExecStart=/usr/local/bin/mitmweb --web-host 0.0.0.0 --web-port 8081 --mode transparent --set block_global=false --set web_password=admin -s /etc/mitmproxy/mitm_filter.py
+ExecStartPost=+/bin/bash -c 'for i in {1..10}; do if [ -f /home/mitm-proxy/.mitmproxy/mitmproxy-ca-cert.pem ]; then cp /home/mitm-proxy/.mitmproxy/mitmproxy-ca-cert.pem /usr/local/share/ca-certificates/mitmproxy.crt && update-ca-certificates --fresh > /dev/null && echo "✅ CA certificate installed successfully." && break; fi; sleep 1; done'
 Restart=always
 RestartSec=5
 

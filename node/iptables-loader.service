@@ -1,6 +1,7 @@
 [Unit]
 Description=Load custom iptables rules on startup
-After=network.target
+After=network.target docker.service
+Wants=docker.service
 
 [Service]
 Type=oneshot

@@ -2,8 +2,10 @@ services:
   # The Secure Ubuntu Sandbox (All-in-One: OpenClaw + Docker + Predicate + Mitmproxy)
   openclaw-node:
     image: ghcr.io/cruel/openclaw-images/openclaw-node:latest
+    pull_policy: always
     runtime: ${OPENCLAW_NODE_RUNTIME:-runc}
     privileged: ${OPENCLAW_NODE_PRIVILEGED:-false}
+    restart: unless-stopped
     environment:
       - PREDICATE_AUTHORITY_URL=http://localhost:8787
       - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
@@ -20,11 +22,14 @@ services:
       - ./iptables-rules.sh:/usr/local/bin/iptables-rules.sh:ro
       - ./node-docker-compose.yml:/home/node/docker-compose.yml:ro
       - ./node_config:/home/node/node_config
+      - ./node_data:/home/node/data
       - docker_lib:/var/lib/docker
+      - ./workspace:/home/node/workspace
       - mitmproxy_certs:/home/mitm-proxy/.mitmproxy
 
   openclaw-gateway:
     image: ghcr.io/cruel/openclaw-images/openclaw-gateway:latest
+    pull_policy: always
     container_name: openclaw-gateway
     env_file: .env
     healthcheck:
@@ -40,14 +45,14 @@ services:
       retries: 5
       start_period: 10s
     network_mode: "service:openclaw-node"
+    restart: unless-stopped
     environment:
-      - HTTP_PROXY=http://127.0.0.1:8080
-      - HTTPS_PROXY=http://127.0.0.1:8080
-      - NO_PROXY=localhost,127.0.0.1
       - NODE_EXTRA_CA_CERTS=/home/node/.mitmproxy/mitmproxy-ca-cert.pem
+      - DOCKER_HOST=tcp://127.0.0.1:2375
     volumes:
       - ./gateway_config:/home/node/.openclaw
-      - ./openclaw.json:/home/node/.openclaw/openclaw.json
+      - ./workspace:/home/node/workspace
+      - ./node_data:/home/node/data
       - mitmproxy_certs:/home/node/.mitmproxy:ro
 
   # Secure Remote Access via Cloudflare Tunnel

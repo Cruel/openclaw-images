@@ -1,6 +1,7 @@
 services:
   openclaw-node-host:
     image: ghcr.io/cruel/openclaw-images/openclaw-gateway:latest
+    pull_policy: always
     container_name: openclaw-node-host
     restart: always
     environment:
@@ -22,4 +23,14 @@ services:
       - /var/run/docker.sock:/var/run/docker.sock
     # network_mode: "host" is required so it connects to the outer docker network namespace
     # and properly resolves the openclaw-gateway hostname through the outer Docker DNS.
+    network_mode: "host"
+  
+  # Securely proxy the unix socket to TCP (localhost only)
+  # This avoids sharing the entire /var/run directory with the outer gateway.
+  socket-proxy:
+    image: alpine/socat
+    restart: always
+    command: tcp-listen:2375,fork,reuseaddr unix-connect:/var/run/docker.sock
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
     network_mode: "host"

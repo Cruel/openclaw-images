@@ -53,6 +53,8 @@ fi
 echo "Ensuring configuration directories exist..."
 mkdir -p "$COMPOSE_DIR/gateway_config"
 mkdir -p "$COMPOSE_DIR/node_config"
+mkdir -p "$COMPOSE_DIR/node_data"
+mkdir -p "$COMPOSE_DIR/workspace"
 mkdir -p "$COMPOSE_DIR"
 for template in "$COMPOSE_DIR"/*.default.*; do
   [ -e "$template" ] || continue
