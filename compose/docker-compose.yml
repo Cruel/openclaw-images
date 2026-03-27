@@ -1,6 +1,10 @@
 services:
   # The Secure Ubuntu Sandbox (All-in-One: OpenClaw + Docker + Predicate + Mitmproxy)
   openclaw-node:
+    # Wait for initial permission synchronization
+    depends_on:
+      permissions-fixer:
+        condition: service_healthy
     image: ghcr.io/cruel/openclaw-images/openclaw-node:latest
     build:
       context: ../node
@@ -30,6 +34,10 @@ services:
       - mitmproxy_certs:/home/mitm-proxy/.mitmproxy
 
   openclaw-gateway:
+    # Wait for initial permission synchronization
+    depends_on:
+      permissions-fixer:
+        condition: service_healthy
     image: ghcr.io/cruel/openclaw-images/openclaw-gateway:latest
     pull_policy: always
     container_name: openclaw-gateway
@@ -80,6 +88,12 @@ services:
       - ./node_config:/mnt/node_config
       - ./node_data:/mnt/node_data
       - ./workspace:/mnt/workspace
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/ready"]
+      interval: 1s
+      timeout: 1s
+      retries: 5
+      start_period: 2s
 
 volumes:
   docker_lib:

@@ -8,6 +8,8 @@ PATHS="/mnt/gateway_config /mnt/node_config /mnt/node_data /mnt/workspace"
 HOST_UID="${PUID:-1000}"
 if [ "$HOST_UID" = "1000" ]; then
     echo "Host UID matches container UID (1000). Success is guaranteed. No watcher needed."
+    # Signal that we are ready for other services (even if sitting idle)
+    touch /tmp/ready
     # Sleep indefinitely to avoid a Docker restart loop (unless-stopped/always).
     exec sleep infinity
 fi
@@ -27,13 +29,15 @@ if [ -z "$EXISTING_PATHS" ]; then
     exit 1
 fi
 
-# Initial pass to ensure current files are correct
+# Initial pass to ensure current files are correct (Catch-up mode)
 echo "Performing initial permission sync..."
-setfacl -R -m u:1000:rwx,u:${HOST_UID}:rwx,d:u:1000:rwx,d:u:${HOST_UID}:rwx,m:rwx $EXISTING_PATHS
+setfacl -R -m u:1000:rwx,u:${HOST_UID}:rwx,d:u:1000:rwx,d:u:${HOST_UID}:rwx,m:rwx $EXISTING_PATHS || true
+
+# Signal that the initial sync is finished (for Docker healthcheck)
+touch /tmp/ready
 
 # Watch recursively for creations, moves, and attribute changes (chmod)
-# Using null delimiter (-0) to safely handle filenames with spaces
-inotifywait -m -r -0 -e create,moved_to,attrib --format '%w%f' $EXISTING_PATHS | while IFS= read -r -d '' FILE
+inotifywait -m -r -e create,moved_to,attrib --format '%w%f' $EXISTING_PATHS | while IFS= read -r FILE
 do
     if [ -e "$FILE" ]; then
         # Ensure node user (1000) and Host user (PUID) always have rwx.
