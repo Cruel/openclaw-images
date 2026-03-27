@@ -3,9 +3,9 @@ FROM ${OPENCLAW_NODE_IMAGE}
 
 
 ENV DEBIAN_FRONTEND=noninteractive \
-    DOCKER_VERSION=29.3.0 \
-    DOCKER_COMPOSE_VERSION=v5.1.0 \
-    CONTAINER_SYSBOX_VERSION=0.6.7
+    DOCKER_VERSION=29.3.1 \
+    DOCKER_COMPOSE_VERSION=v5.1.1 \
+    CONTAINER_SYSBOX_VERSION=0.7.0
 
 # Install system components, Docker, and create openclaw user
 COPY install.sh /usr/local/bin/install.sh
