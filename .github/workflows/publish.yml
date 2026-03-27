@@ -72,3 +72,5 @@ jobs:
             sandbox-base.cache-to=type=gha,mode=max,scope=sandbox-base
             sandbox-common.cache-from=type=gha,scope=sandbox-common
             sandbox-common.cache-to=type=gha,mode=max,scope=sandbox-common
+            permissions-fixer.cache-from=type=gha,scope=permissions-fixer
+            permissions-fixer.cache-to=type=gha,mode=max,scope=permissions-fixer

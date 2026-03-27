@@ -16,7 +16,7 @@ variable "OPENCLAW_NODE_IMAGE" {
 # -----------------------------------------------------------------------------
 
 group "default" {
-  targets = ["gateway", "sandbox", "sandbox-browser", "node"]
+  targets = ["gateway", "sandbox", "sandbox-browser", "node", "permissions-fixer"]
 }
 
 # -----------------------------------------------------------------------------
@@ -78,4 +78,11 @@ target "node" {
     OPENCLAW_NODE_IMAGE = "${OPENCLAW_NODE_IMAGE}"
   }
   tags       = ["${IMAGE_PREFIX}/openclaw-node:latest"]
+}
+
+target "permissions-fixer" {
+  context    = "permissions-fixer"
+  dockerfile = "Dockerfile"
+  platforms  = ["linux/amd64", "linux/arm64"]
+  tags       = ["${IMAGE_PREFIX}/permissions-fixer:latest"]
 }

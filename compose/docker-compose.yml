@@ -2,6 +2,8 @@ services:
   # The Secure Ubuntu Sandbox (All-in-One: OpenClaw + Docker + Predicate + Mitmproxy)
   openclaw-node:
     image: ghcr.io/cruel/openclaw-images/openclaw-node:latest
+    build:
+      context: ../node
     pull_policy: always
     runtime: ${OPENCLAW_NODE_RUNTIME:-runc}
     privileged: ${OPENCLAW_NODE_PRIVILEGED:-false}
@@ -62,6 +64,22 @@ services:
     environment:
       - TUNNEL_TOKEN=${TUNNEL_TOKEN}
     restart: always
+
+  # Dedicated real-time permission fixer for non-1000 host UIDs.
+  permissions-fixer:
+    image: ghcr.io/cruel/openclaw-images/permissions-fixer:latest
+    build:
+      context: ../permissions-fixer
+    pull_policy: always
+    container_name: permissions-fixer
+    restart: unless-stopped
+    environment:
+      - PUID=${PUID:-1000}
+    volumes:
+      - ./gateway_config:/mnt/gateway_config
+      - ./node_config:/mnt/node_config
+      - ./node_data:/mnt/node_data
+      - ./workspace:/mnt/workspace
 
 volumes:
   docker_lib:

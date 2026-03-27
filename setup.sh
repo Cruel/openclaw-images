@@ -5,10 +5,13 @@ set -euo pipefail
 GEN_COMMENT="# GENERATED: DO NOT EDIT"
 COMPOSE_DIR="./compose"
 
+# Detect Host identity
+PUID=$(id -u)
+echo "Detected Host User: UID=$PUID"
+
 # Detect Host Docker GID
 DOCKER_SOCKET="/var/run/docker.sock"
 if [ -S "$DOCKER_SOCKET" ]; then
-  # Try Linux (stat -c) and macOS (stat -f)
   DOCKER_GID="$(stat -c '%g' "$DOCKER_SOCKET" 2>/dev/null || stat -f '%g' "$DOCKER_SOCKET" 2>/dev/null || echo '')"
   if [ -n "$DOCKER_GID" ]; then
     echo "Detected Host Docker GID: $DOCKER_GID"
@@ -51,11 +54,27 @@ fi
 
 # Handle Configuration Templates and Directories
 echo "Ensuring configuration directories exist..."
-mkdir -p "$COMPOSE_DIR/gateway_config"
-mkdir -p "$COMPOSE_DIR/node_config"
-mkdir -p "$COMPOSE_DIR/node_data"
-mkdir -p "$COMPOSE_DIR/workspace"
+DIRS=("$COMPOSE_DIR/gateway_config" "$COMPOSE_DIR/node_config" "$COMPOSE_DIR/node_data" "$COMPOSE_DIR/workspace")
+mkdir -p "${DIRS[@]}"
 mkdir -p "$COMPOSE_DIR"
+
+# Fix permissions using ACL if available (handles non-1000 host UIDs)
+if [ "$PUID" != "1000" ] && command -v setfacl >/dev/null 2>&1; then
+  echo "Applying bidirectional ACLs for host user (UID $PUID) and container (UID 1000)..."
+  # Grant both users access. Default ACLs (-d) ensure inheritance for new files.
+  # We also set the mask (m:) to rwx to ensure chmod calls don't immediately break the ACL entries.
+  if sudo setfacl -R -m u:1000:rwx,u:${PUID}:rwx,d:u:1000:rwx,d:u:${PUID}:rwx,m:rwx "${DIRS[@]}"; then
+    echo "  ACLs applied successfully"
+  else
+    echo "ERROR: Failed to apply ACLs. Please ensure your filesystem supports them."
+    exit 1
+  fi
+elif [ "$PUID" != "1000" ] && ! command -v setfacl >/dev/null 2>&1; then
+    echo "WARNING: setfacl not found and you are not UID 1000."
+    echo "  The container (UID 1000) may have permission issues with mounted volumes."
+    echo "  Consider installing 'acl' with: sudo apt-get install acl"
+fi
+
 for template in "$COMPOSE_DIR"/*.default.*; do
   [ -e "$template" ] || continue
   
@@ -86,9 +105,12 @@ fi
 tmp_env=$(mktemp)
 
 # Prepend Managed Variables
-echo "DOCKER_GID=$DOCKER_GID $GEN_COMMENT" >> "$tmp_env"
-echo "OPENCLAW_NODE_RUNTIME=$RUNTIME $GEN_COMMENT" >> "$tmp_env"
-echo "OPENCLAW_NODE_PRIVILEGED=$PRIVILEGED $GEN_COMMENT" >> "$tmp_env"
+{
+  echo "PUID=$PUID $GEN_COMMENT"
+  echo "DOCKER_GID=$DOCKER_GID $GEN_COMMENT"
+  echo "OPENCLAW_NODE_RUNTIME=$RUNTIME $GEN_COMMENT"
+  echo "OPENCLAW_NODE_PRIVILEGED=$PRIVILEGED $GEN_COMMENT"
+} >> "$tmp_env"
 
 # Handle Gateway Token
 if grep -q "^OPENCLAW_GATEWAY_TOKEN=" "$ENV_FILE"; then
@@ -111,7 +133,7 @@ else
 fi
 
 # Append remaining existing configuration
-grep -Ev "^(DOCKER_GID|OPENCLAW_NODE_RUNTIME|OPENCLAW_NODE_PRIVILEGED|OPENCLAW_GATEWAY_TOKEN)=" "$ENV_FILE" >> "$tmp_env" || true
+grep -Ev "^(PUID|DOCKER_GID|OPENCLAW_NODE_RUNTIME|OPENCLAW_NODE_PRIVILEGED|OPENCLAW_GATEWAY_TOKEN)=" "$ENV_FILE" >> "$tmp_env" || true
 
 mv "$tmp_env" "$ENV_FILE"
 echo "Updated $ENV_FILE with GID, RUNTIME, and PRIVILEGED."
