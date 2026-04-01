@@ -16,7 +16,7 @@ variable "OPENCLAW_NODE_IMAGE" {
 # -----------------------------------------------------------------------------
 
 group "default" {
-  targets = ["gateway", "sandbox", "sandbox-browser", "node", "permissions-fixer"]
+  targets = ["gateway", "sandbox", "sandbox-browser", "node", "permissions-fixer", "paperclip"]
 }
 
 # -----------------------------------------------------------------------------
@@ -85,4 +85,11 @@ target "permissions-fixer" {
   dockerfile = "Dockerfile"
   platforms  = ["linux/amd64", "linux/arm64"]
   tags       = ["${IMAGE_PREFIX}/permissions-fixer:latest"]
+}
+
+target "paperclip" {
+  context    = "paperclip"
+  dockerfile = "Dockerfile"
+  platforms  = ["linux/amd64", "linux/arm64"]
+  tags       = ["${IMAGE_PREFIX}/paperclip:latest"]
 }

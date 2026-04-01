@@ -27,6 +27,14 @@ jobs:
           ref: secure
           fetch-depth: 1
 
+      - name: Checkout Paperclip
+        uses: actions/checkout@v4
+        with:
+          repository: cruel/paperclip
+          path: paperclip
+          ref: fix
+          fetch-depth: 1
+
       - name: Set lower case repo name
         run: echo "IMAGE_PREFIX=ghcr.io/${GITHUB_REPOSITORY,,}" >> $GITHUB_ENV
 
@@ -74,3 +82,5 @@ jobs:
             sandbox-common.cache-to=type=gha,mode=max,scope=sandbox-common
             permissions-fixer.cache-from=type=gha,scope=permissions-fixer
             permissions-fixer.cache-to=type=gha,mode=max,scope=permissions-fixer
+            paperclip.cache-from=type=gha,scope=paperclip
+            paperclip.cache-to=type=gha,mode=max,scope=paperclip
