@@ -15,12 +15,12 @@ services:
     environment:
       - PREDICATE_AUTHORITY_URL=http://localhost:8787
       - OPENCLAW_GATEWAY_TOKEN=${OPENCLAW_GATEWAY_TOKEN}
+      - PAPERCLIP_PUBLIC_URL=${PAPERCLIP_PUBLIC_URL}
+      - BETTER_AUTH_SECRET=${BETTER_AUTH_SECRET}
     networks:
       default:
         aliases:
           - openclaw-gateway
-    group_add:
-      - "${DOCKER_GID:-999}"
     volumes:
       - ./predicate-authorityd.toml:/etc/predicate/authorityd.toml:ro
       - ./policy.yaml:/etc/predicate/policy.yaml:ro

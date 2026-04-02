@@ -101,7 +101,9 @@ systemctl mask getty.service getty.target
 # Force overlay2 storage driver
 mkdir -p /etc/docker && echo '{"storage-driver":"overlay2"}' > /etc/docker/daemon.json
 
-# Configure existing 'node' user (UID 1000)
+# Configure existing 'node' user (UID 1000) and groups
+groupmod -g 997 docker || true
+groupadd -g 1001 sysbox || true
 usermod -aG docker node
 echo "node:node" | chpasswd
 mkdir -p /home/node/.openclaw && chown -R node:node /home/node

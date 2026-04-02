@@ -61,6 +61,8 @@ services:
       PAPERCLIP_DEPLOYMENT_EXPOSURE: "private"
       PAPERCLIP_PUBLIC_URL: "${PAPERCLIP_PUBLIC_URL:-http://localhost:3100}"
       BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET must be set}"
+    group_add:
+      - docker
     volumes:
       - paperclip-data:/paperclip
       - /var/run/docker.sock:/var/run/docker.sock
